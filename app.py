@@ -1,10 +1,8 @@
-#Usage: python app.py
+# usage: python app.py
 import os
 from flask import Flask, render_template, request, redirect, url_for
 from werkzeug import secure_filename
-import numpy as np
 import argparse
-import imutils
 import cv2
 import time
 import uuid
@@ -13,9 +11,9 @@ import base64
 from fastai.vision import *
 
 tfms = get_transforms(flip_vert=True, max_lighting=0.1, max_zoom=1.05, max_warp=0.)
-path = Path('/kaggle/input/')
+path = Path('')
 
-data = ImageList.from_csv(path, 'training.csv', cols=0, folder='images', suffix='')
+data = ImageList.from_csv(path, 'training.csv', cols=0, folder='covid19-dataset/images', suffix='')
 data = data.split_by_rand_pct(0.1)\
        .label_from_df(cols=1)\
        .transform(get_transforms(), size=224, resize_method=3)\
