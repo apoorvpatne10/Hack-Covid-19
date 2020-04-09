@@ -1,0 +1,4 @@
+Flask==1.0.2
+Flask-WTF==0.14.2
+Werkzeug==0.14.1
+fastai==1.0.60
