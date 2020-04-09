@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+models/stage-2.pth
+covid19-dataset/images
+
 # C extensions
 *.so
 
