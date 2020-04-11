@@ -13,14 +13,14 @@ from fastai.vision import *
 tfms = get_transforms(flip_vert=True, max_lighting=0.1, max_zoom=1.05, max_warp=0.)
 path = Path('')
 
-data = ImageList.from_csv(path, 'training.csv', cols=0, folder='covid19-dataset/images', suffix='')
-data = data.split_by_rand_pct(0.1)\
-       .label_from_df(cols=1)\
-       .transform(get_transforms(), size=224, resize_method=3)\
-       .databunch(bs=32)\
-       .normalize(imagenet_stats)
-
-learn = cnn_learner(data, models.resnet101, metrics=[error_rate,accuracy]).load("stage-2")
+# data = ImageList.from_csv(path, 'covid19-dataset/training.csv', cols=0, folder='covid19-dataset/images', suffix='')
+# data = data.split_by_rand_pct(0.1)\
+#        .label_from_df(cols=1)\
+#        .transform(get_transforms(), size=224, resize_method=3)\
+#        .databunch(bs=32)\
+#        .normalize(imagenet_stats)
+#
+# learn = cnn_learner(data, models.resnet101, metrics=[error_rate,accuracy]).load("stage-2")
 
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = set(['jpg', 'jpeg'])
@@ -53,10 +53,14 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 @app.route("/")
-def template_test():
-    return render_template('template.html', label='', imagesource='../uploads/icon.jpeg')
+def home_page():
+    return render_template('home.html')
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route("/lungs/")
+def template_test():
+    return render_template('lungs.html', label='', imagesource='../uploads/icon.jpeg')
+
+@app.route('/lungs/', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'POST':
         import time
@@ -80,7 +84,7 @@ def upload_file():
 
             os.rename(file_path, os.path.join(app.config['UPLOAD_FOLDER'], filename))
             print("--- %s seconds ---" % str (time.time() - start_time))
-            return render_template('template.html', label=label, imagesource='../uploads/' + filename)
+            return render_template('lungs.html', label=label, imagesource='../uploads/' + filename)
 
 from flask import send_from_directory
 
