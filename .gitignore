@@ -5,6 +5,7 @@ __pycache__/
 
 models/stage-2.pth
 covid19-dataset/images
+site.db
 
 # C extensions
 *.so
