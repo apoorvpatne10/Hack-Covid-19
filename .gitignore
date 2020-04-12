@@ -8,6 +8,7 @@ flask_app/covid19-dataset/images
 flask_app/site.db
 site.db
 *.json
+*.txt
 
 # C extensions
 *.so
