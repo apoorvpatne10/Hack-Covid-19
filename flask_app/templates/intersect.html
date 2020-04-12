@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Possible Timeline Intersections
+{% endblock %}
+
+{% block content %}
+
+    <div class="container" id="intersections">
+        <h2>Possible Timeline Intersections</h2>
+
+        <table>
+
+            <tr>
+                {% for col in column_names %}
+                    <th>{{col}}</th>
+                {% endfor %}
+            </tr>
+            {% for row in row_data %}
+            <tr>
+                {% for col, row_ in zip(column_names, row) %}
+                    <td>{{row_}}</td>                
+                {% endfor %}
+            </tr>
+            {% endfor %}
+
+        </table>
+    </div>
+
+
+{% endblock %}
