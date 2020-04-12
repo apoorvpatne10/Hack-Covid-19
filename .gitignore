@@ -5,6 +5,7 @@ __pycache__/
 
 models/stage-2.pth
 flask_app/covid19-dataset/images
+flask_app/site.db
 site.db
 
 # C extensions
