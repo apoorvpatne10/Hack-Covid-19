@@ -6,8 +6,12 @@ import time
 import json
 import uuid
 import base64
+import requests
 import argparse
 import pandas as pd
+import math
+import re
+from collections import Counter
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug import secure_filename
@@ -16,7 +20,65 @@ from fastai.vision import *
 from flask_app.models import Patient, Record
 from flask_app.forms import PatientEntryForm, SuspectEntryForm
 from flask_app import app, db
+from bs4 import BeautifulSoup
 
+
+# Fake news
+URL = 'https://www.who.int/emergencies/diseases/novel-coronavirus-2019/advice-for-public/myth-busters'
+page = requests.get(URL)
+
+soup = BeautifulSoup(page.content, 'html.parser')
+results = soup.find(id='PageContent_C002_Col01')
+
+results = results.text.split("\n")
+facts = []
+
+for i in results:
+	if(i != "" and i != "Download and share the graphic" and i!= " "):
+		facts.append(i)
+
+
+WORD = re.compile(r"\w+")
+
+def get_cosine(vec1, vec2):
+    intersection = set(vec1.keys()) & set(vec2.keys())
+    numerator = sum([vec1[x] * vec2[x] for x in intersection])
+
+    sum1 = sum([vec1[x] ** 2 for x in list(vec1.keys())])
+    sum2 = sum([vec2[x] ** 2 for x in list(vec2.keys())])
+    denominator = math.sqrt(sum1) * math.sqrt(sum2)
+
+    if not denominator:
+        return 0.0
+    else:
+        return float(numerator) / denominator
+
+
+def text_to_vector(text):
+    words = WORD.findall(text)
+    return Counter(words)
+
+facts_vec = []
+for i in facts:
+	facts_vec.append(text_to_vector(i))
+
+@app.route("/fake_news/")
+def fk_news():
+    return render_template("news.html")
+
+@app.route("/get")
+def get_bot_response():
+    userText = request.args.get('msg')
+    userText_vec = text_to_vector(userText)
+    get_cosine_score = []
+
+    for i in facts_vec:
+    	get_cosine_score.append(get_cosine(i,userText_vec))
+
+    return facts[get_cosine_score.index(max(get_cosine_score))]
+
+
+########################################################
 
 tfms = get_transforms(
     flip_vert=True,
@@ -25,14 +87,14 @@ tfms = get_transforms(
     max_warp=0.)
 path = Path('')
 
-# data = ImageList.from_csv(path, 'flask_app/covid19-dataset/training.csv', cols=0, folder='flask_app/covid19-dataset/images', suffix='')
-# data = data.split_by_rand_pct(0.1)\
-#        .label_from_df(cols=1)\
-#        .transform(get_transforms(), size=224, resize_method=3)\
-#        .databunch(bs=32)\
-#        .normalize(imagenet_stats)
-#
-# learn = cnn_learner(data, models.resnet101, metrics=[error_rate,accuracy]).load("stage-2")
+data = ImageList.from_csv(path, 'flask_app/covid19-dataset/training.csv', cols=0, folder='flask_app/covid19-dataset/images', suffix='')
+data = data.split_by_rand_pct(0.1)\
+       .label_from_df(cols=1)\
+       .transform(get_transforms(), size=224, resize_method=3)\
+       .databunch(bs=32)\
+       .normalize(imagenet_stats)
+
+learn = cnn_learner(data, models.resnet101, metrics=[error_rate,accuracy]).load("stage-2")
 
 ALLOWED_EXTENSIONS = set(['jpg', 'jpeg'])
 
